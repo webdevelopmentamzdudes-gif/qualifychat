@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requestLiveAgent } from "@/lib/live-agent/session-service";
+import { notifyOwnerLiveAgentRequest } from "@/lib/notify-owner";
 
 export const runtime = "nodejs";
 
@@ -20,12 +21,19 @@ export async function POST(req: Request) {
     }
 
     const admin = createAdminClient();
-    const session = await requestLiveAgent(
+    const { session, isNewRequest } = await requestLiveAgent(
       admin,
       parsed.data.businessId,
       parsed.data.sessionId,
       parsed.data.preview || "Live agent requested"
     );
+
+    if (isNewRequest) {
+      await notifyOwnerLiveAgentRequest(admin, parsed.data.businessId, {
+        sessionId: parsed.data.sessionId,
+        preview: parsed.data.preview || "Live agent requested",
+      });
+    }
 
     return NextResponse.json({
       ok: true,

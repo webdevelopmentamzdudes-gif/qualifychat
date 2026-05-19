@@ -5,7 +5,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { computeLeadStatus } from "@/lib/lead-qualification";
 import { extractLeadHints, mergeLeadFields } from "@/lib/extract-contact";
 import { assistantSuggestsHandover } from "@/lib/assistant-handover";
-import { sendQualifiedLeadEmail } from "@/lib/email";
+import {
+  notifyOwnerLiveAgentRequest,
+  notifyOwnerNewLead,
+  notifyOwnerQualifiedLead,
+} from "@/lib/notify-owner";
 import {
   formatRagContext,
   retrieveRelevantChunks,
@@ -108,12 +112,18 @@ export async function POST(req: Request) {
     }
 
     if (visitorRequestsLiveAgent(last.content)) {
-      await requestLiveAgent(
+      const { isNewRequest } = await requestLiveAgent(
         admin,
         businessId,
         sessionId,
         last.content
       );
+      if (isNewRequest) {
+        await notifyOwnerLiveAgentRequest(admin, businessId, {
+          sessionId,
+          preview: last.content,
+        });
+      }
       const handoverReply =
         "You requested a live team member. Please wait — someone from our team will join this chat shortly. You can keep typing here while you wait.";
       return NextResponse.json({
@@ -270,6 +280,7 @@ Lead fields enabled for capture (ask naturally when there is buying intent): ${J
     };
 
     let leadId = existingLead?.id as string | undefined;
+    let isNewLead = false;
 
     if (existingLead) {
       const { data: upd, error: uErr } = await admin
@@ -291,6 +302,7 @@ Lead fields enabled for capture (ask naturally when there is buying intent): ${J
         .single();
       if (iErr) console.error(iErr);
       leadId = ins?.id;
+      isNewLead = Boolean(leadId);
     }
 
     await admin.from("conversations").insert({
@@ -312,17 +324,34 @@ Lead fields enabled for capture (ask naturally when there is buying intent): ${J
       .eq("session_id", sessionId);
 
     if (visitorRequestsLiveAgent(last.content) || handover) {
-      await requestLiveAgent(admin, businessId, sessionId, last.content);
+      const { isNewRequest } = await requestLiveAgent(
+        admin,
+        businessId,
+        sessionId,
+        last.content
+      );
+      if (isNewRequest) {
+        await notifyOwnerLiveAgentRequest(admin, businessId, {
+          sessionId,
+          preview: last.content,
+        });
+      }
     }
 
-    if (
-      status === "QUALIFIED" &&
-      previousStatus !== "QUALIFIED" &&
-      business.contact_email
-    ) {
-      await sendQualifiedLeadEmail({
-        to: business.contact_email,
-        businessName: business.business_name,
+    if (isNewLead && leadId) {
+      await notifyOwnerNewLead(admin, businessId, {
+        leadId,
+        name: merged.name || "",
+        phone: merged.phone || "",
+        email: merged.email || "",
+        serviceRequired: merged.service_required || "",
+        leadStatus: status,
+        summary: summaryText,
+      });
+    }
+
+    if (status === "QUALIFIED" && previousStatus !== "QUALIFIED") {
+      await notifyOwnerQualifiedLead(admin, businessId, {
         name: merged.name || "",
         phone: merged.phone || "",
         email: merged.email || "",

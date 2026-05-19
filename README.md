@@ -1,6 +1,6 @@
 # QualifyChat
 
-QualifyChat is a B2B SaaS-style MVP where businesses configure an AI chatbot from their **business profile**, embed it on any website, and manage **leads**, **conversations**, and **chatbot settings** from a protected dashboard. OpenAI powers replies (server-side only); Supabase handles auth and data; Resend sends email when a lead becomes **QUALIFIED**.
+QualifyChat is a B2B SaaS-style MVP where businesses configure an AI chatbot from their **business profile**, embed it on any website, and manage **leads**, **conversations**, and **chatbot settings** from a protected dashboard. OpenAI powers replies (server-side only); Supabase handles auth and data; **Resend** emails the owner on **new leads**, **live agent requests**, and when a lead becomes **QUALIFIED**.
 
 ## Features
 
@@ -10,7 +10,7 @@ QualifyChat is a B2B SaaS-style MVP where businesses configure an AI chatbot fro
 - **Sidebar**: Dashboard, Business Profile, **Knowledge Base**, Leads, Conversations, Chatbot Settings, Embed Code, Account Settings.
 - **Business profile** stored in Postgres (services, pricing, FAQs, hours, tone, contact, etc.).
 - **AI chatbot** (`/chatbot/[businessId]`) — uses business profile + **uploaded documents (RAG)**; never invents facts beyond provided data.
-- **Server `/api/chat`** route: OpenAI + lead extraction + qualification + conversation rows + optional **Resend** email for qualified leads.
+- **Server `/api/chat`** route: OpenAI + lead extraction + qualification + conversation rows + **Resend** owner emails (new lead, live agent, qualified).
 - **Embed script** (`public/embed.js`) — floating launcher + iframe to your hosted chat page.
 - **Demo business** (“GlowCare Clinic”) auto-seeded on first dashboard load when the account has no businesses yet.
 
@@ -70,8 +70,8 @@ Copy `.env.example` to `.env.local` and fill in:
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key — **server only** (API routes) |
 | `OPENAI_API_KEY` | OpenAI secret |
 | `OPENAI_MODEL` | Optional; default `gpt-4o-mini` |
-| `RESEND_API_KEY` | Resend API key for qualified-lead emails |
-| `RESEND_FROM_EMAIL` | Optional “from” address (must be allowed in Resend; dev default uses Resend onboarding sender if unset) |
+| `RESEND_API_KEY` | Resend API key for owner alert emails |
+| `RESEND_FROM_EMAIL` | Verified “from” address in Resend (required for production) |
 | `NEXT_PUBLIC_APP_URL` | Base URL of this app (used in embed instructions), e.g. `http://localhost:3000` or `https://your-domain.com` |
 | `OPENAI_EMBEDDING_MODEL` | Optional; default `text-embedding-3-small` for knowledge base RAG |
 | `KNOWLEDGE_MAX_FILE_MB` | Optional; max upload size per file (default `10`) |
@@ -89,9 +89,10 @@ Optional: set `OPENAI_MODEL` (e.g. `gpt-4o-mini`) to control cost and behavior.
 
 1. Create an account at [resend.com](https://resend.com) and create an API key → `RESEND_API_KEY`.
 2. Configure `RESEND_FROM_EMAIL` with a verified sender/domain in Resend (required for production).
-3. Set **Business profile → Contact email** to an inbox you monitor — qualified leads email that address.
+3. Set **Business profile → Contact email** to the owner’s Gmail (or leave blank to use the **signup email** on the account).
+4. Alerts are sent for: **first new lead**, **live agent requested**, and **lead becomes qualified** (with a link to the dashboard).
 
-If Resend is not configured, the app still runs; qualified-lead emails are skipped with a console warning.
+If Resend is not configured, the app still runs; emails are skipped with a console warning.
 
 ## Run locally
 
@@ -109,12 +110,18 @@ Open [http://localhost:3000](http://localhost:3000).
 2. Open **Dashboard** — the **GlowCare Clinic** demo business is created automatically if you had none.
 3. Copy your **business ID** from **Embed code** and open `/chatbot/[businessId]` to test the widget.
 
-## Deploy on Vercel
+## Deploy on Vercel (production: qualifychat.amzdudes.io)
 
-1. Push the repo to GitHub/GitLab and import the project in [Vercel](https://vercel.com).
-2. Add the same environment variables in **Project Settings → Environment Variables**.
-3. Set `NEXT_PUBLIC_APP_URL` to your production URL (e.g. `https://your-app.vercel.app`).
-4. Update Supabase **Site URL** and **Redirect URLs** to include `https://YOUR_DOMAIN/auth/callback`.
+1. Import [github.com/webdevelopmentamzdudes-gif/qualifychat](https://github.com/webdevelopmentamzdudes-gif/qualifychat) in [Vercel](https://vercel.com).
+2. Add all variables from `.env.example` under **Project Settings → Environment Variables** (Production).
+3. Set **`NEXT_PUBLIC_APP_URL`** = `https://qualifychat.amzdudes.io`
+4. In Vercel **Domains**, add `qualifychat.amzdudes.io` and point DNS (CNAME to `cname.vercel-dns.com` or A record per Vercel).
+5. In **Supabase → Authentication → URL configuration**:
+   - **Site URL**: `https://qualifychat.amzdudes.io`
+   - **Redirect URLs** (add both):
+     - `https://qualifychat.amzdudes.io/auth/callback`
+     - `http://localhost:3000/auth/callback` (keep for local dev)
+6. Redeploy after env changes so embed URLs and auth use the live domain.
 
 ## Test the demo chatbot
 
@@ -139,7 +146,7 @@ You can **edit extracted text**, **replace** the file, **disable** a doc without
 Use the snippet from **Dashboard → Embed code**, for example:
 
 ```html
-<script src="https://yourdomain.com/embed.js" data-business-id="YOUR_BUSINESS_UUID" async defer></script>
+<script src="https://qualifychat.amzdudes.io/embed.js" data-business-id="YOUR_BUSINESS_UUID" async defer></script>
 ```
 
 The script loads `embed.js` from your deployment, resolves the origin from the script URL, and opens an iframe to `/chatbot/[businessId]?embed=1`.

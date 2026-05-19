@@ -34,11 +34,11 @@ export async function requestLiveAgent(
   businessId: string,
   sessionId: string,
   preview: string
-) {
+): Promise<{ session: Awaited<ReturnType<typeof getOrCreateChatSession>>; isNewRequest: boolean }> {
   const session = await getOrCreateChatSession(admin, businessId, sessionId);
 
   if (session.mode === "live" || session.mode === "waiting_agent") {
-    return session;
+    return { session, isNewRequest: false };
   }
 
   const now = new Date().toISOString();
@@ -76,7 +76,7 @@ export async function requestLiveAgent(
     .eq("business_id", businessId)
     .eq("visitor_session_id", sessionId);
 
-  return updated;
+  return { session: updated, isNewRequest: true };
 }
 
 export async function buildUnifiedMessages(
