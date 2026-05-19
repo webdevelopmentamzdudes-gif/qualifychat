@@ -1,6 +1,6 @@
 # QualifyChat
 
-QualifyChat is a B2B SaaS-style MVP where businesses configure an AI chatbot from their **business profile**, embed it on any website, and manage **leads**, **conversations**, and **chatbot settings** from a protected dashboard. OpenAI powers replies (server-side only); Supabase handles auth and data; **Resend** emails the owner on **new leads**, **live agent requests**, and when a lead becomes **QUALIFIED**.
+QualifyChat is a B2B SaaS-style MVP where businesses configure an AI chatbot from their **business profile**, embed it on any website, and manage **leads**, **conversations**, and **chatbot settings** from a protected dashboard. OpenAI powers replies (server-side only); Supabase handles auth and data; **SMTP** (e.g. Hostinger) emails the owner on **new leads**, **live agent requests**, and when a lead becomes **QUALIFIED**.
 
 ## Features
 
@@ -10,7 +10,7 @@ QualifyChat is a B2B SaaS-style MVP where businesses configure an AI chatbot fro
 - **Sidebar**: Dashboard, Business Profile, **Knowledge Base**, Leads, Conversations, Chatbot Settings, Embed Code, Account Settings.
 - **Business profile** stored in Postgres (services, pricing, FAQs, hours, tone, contact, etc.).
 - **AI chatbot** (`/chatbot/[businessId]`) — uses business profile + **uploaded documents (RAG)**; never invents facts beyond provided data.
-- **Server `/api/chat`** route: OpenAI + lead extraction + qualification + conversation rows + **Resend** owner emails (new lead, live agent, qualified).
+- **Server `/api/chat`** route: OpenAI + lead extraction + qualification + conversation rows + **SMTP** owner emails (new lead, live agent, qualified).
 - **Embed script** (`public/embed.js`) — floating launcher + iframe to your hosted chat page.
 - **Demo business** (“GlowCare Clinic”) auto-seeded on first dashboard load when the account has no businesses yet.
 
@@ -19,7 +19,7 @@ QualifyChat is a B2B SaaS-style MVP where businesses configure an AI chatbot fro
 - **Next.js 14** (App Router), **TypeScript**, **Tailwind CSS**, **shadcn/ui**
 - **Supabase** (Auth + Postgres + RLS)
 - **OpenAI API**
-- **Resend** (transactional email)
+- **SMTP** via Nodemailer (owner alert emails)
 - Deployable on **Vercel**
 
 ## Prerequisites
@@ -27,7 +27,7 @@ QualifyChat is a B2B SaaS-style MVP where businesses configure an AI chatbot fro
 - Node.js 18+
 - Supabase project
 - OpenAI API key
-- (Optional) Resend API key and verified sender/domain for production email
+- (Optional) SMTP mailbox for owner alert emails (e.g. Hostinger `no-reply@yourdomain.com`)
 
 ## Supabase setup
 
@@ -70,8 +70,12 @@ Copy `.env.example` to `.env.local` and fill in:
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key — **server only** (API routes) |
 | `OPENAI_API_KEY` | OpenAI secret |
 | `OPENAI_MODEL` | Optional; default `gpt-4o-mini` |
-| `RESEND_API_KEY` | Resend API key for owner alert emails |
-| `RESEND_FROM_EMAIL` | Verified “from” address in Resend (required for production) |
+| `SMTP_HOST` | Mail server host (e.g. `smtp.hostinger.com`) |
+| `SMTP_PORT` | Usually `465` (SSL) or `587` (TLS) |
+| `SMTP_SECURE` | `true` for port 465; `false` for 587 with STARTTLS |
+| `SMTP_USER` | Mailbox login (full email address) |
+| `SMTP_PASS` | Mailbox password |
+| `SMTP_FROM` | Optional display name + address, e.g. `QualifyChat <no-reply@amzdudes.io>` |
 | `NEXT_PUBLIC_APP_URL` | Base URL of this app (used in embed instructions), e.g. `http://localhost:3000` or `https://your-domain.com` |
 | `OPENAI_EMBEDDING_MODEL` | Optional; default `text-embedding-3-small` for knowledge base RAG |
 | `KNOWLEDGE_MAX_FILE_MB` | Optional; max upload size per file (default `10`) |
@@ -85,21 +89,25 @@ Add `OPENAI_API_KEY` to `.env.local`. The key is read **only** in `app/api/chat/
 
 Optional: set `OPENAI_MODEL` (e.g. `gpt-4o-mini`) to control cost and behavior.
 
-## Resend API key
+## Owner alert emails (SMTP)
 
-1. Create an account at [resend.com](https://resend.com) and create an API key → `RESEND_API_KEY`.
-2. Configure `RESEND_FROM_EMAIL` with a verified sender/domain in Resend (required for production).
-3. Set **Business profile → Contact email** to the owner’s Gmail (or leave blank to use the **signup email** on the account).
-4. Alerts are sent for: **first new lead**, **live agent requested**, and **lead becomes qualified** (with a link to the dashboard).
+Uses your existing email host (same idea as Supabase custom SMTP on Hostinger):
 
-If Resend is not configured, the app still runs; emails are skipped with a console warning.
+1. Create or use a mailbox, e.g. `no-reply@amzdudes.io`, in Hostinger (or your provider).
+2. Copy SMTP settings from the provider (Hostinger: **Emails → your mailbox → Configuration**).
+3. Add to `.env.local` / Vercel:
+   - `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, optional `SMTP_FROM`
+4. Set **Business profile → Contact email** to the owner’s Gmail (or leave blank to use the **signup email**).
+5. Alerts: **first new lead**, **live agent requested**, **lead becomes qualified** (with dashboard links).
+
+If SMTP is not configured, the app still runs; emails are skipped with a console warning.
 
 ## Run locally
 
 ```bash
 npm install
 cp .env.example .env.local
-# Edit .env.local with Supabase + OpenAI (+ optional Resend)
+# Edit .env.local with Supabase + OpenAI (+ optional SMTP)
 
 npm run dev
 ```

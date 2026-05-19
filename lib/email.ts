@@ -1,4 +1,4 @@
-import { Resend } from "resend";
+import { sendSmtpEmail } from "@/lib/smtp";
 import type { LeadStatus } from "@/lib/types";
 
 async function sendOwnerEmail(params: {
@@ -6,24 +6,7 @@ async function sendOwnerEmail(params: {
   subject: string;
   html: string;
 }) {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) {
-    console.warn("RESEND_API_KEY missing — skipping email.");
-    return { ok: false as const, error: "missing_api_key" };
-  }
-
-  const from =
-    process.env.RESEND_FROM_EMAIL || "QualifyChat <onboarding@resend.dev>";
-
-  const resend = new Resend(key);
-  await resend.emails.send({
-    from,
-    to: params.to,
-    subject: params.subject,
-    html: params.html,
-  });
-
-  return { ok: true as const };
+  return sendSmtpEmail(params);
 }
 
 /** First time a visitor becomes a lead in the dashboard. */
