@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Mail, Phone } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 
 const footerLinks = [
@@ -32,8 +33,32 @@ export function LandingFooter() {
           ))}
         </nav>
       </div>
-      <div className="border-t border-border py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} QualifyChat. All rights reserved.
+      <div className="border-t border-border py-5">
+        <div className="container flex flex-col items-center gap-3 text-center text-xs text-muted-foreground sm:flex-row sm:justify-between sm:text-left">
+          <p>© {new Date().getFullYear()} QualifyChat. All rights reserved.</p>
+          <div className="flex flex-col items-center gap-1.5 sm:items-end">
+            <p>
+              Powered by{" "}
+              <span className="font-medium text-foreground">Atif Yasin Fattani</span>
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 sm:justify-end">
+              <a
+                href="mailto:atiffattani021@gmail.com"
+                className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
+              >
+                <Mail className="size-3.5" aria-hidden />
+                atiffattani021@gmail.com
+              </a>
+              <a
+                href="tel:+923152690584"
+                className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
+              >
+                <Phone className="size-3.5" aria-hidden />
+                +92 315 2690584
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </footer>
   );
