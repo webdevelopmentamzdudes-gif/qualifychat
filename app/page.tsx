@@ -19,7 +19,7 @@ export default function LandingPage() {
     <div className="relative min-h-screen">
       <LandingNav />
 
-      <main className="relative overflow-x-hidden pt-16">
+      <main className="relative overflow-x-hidden">
         <HeroSection />
         <ProblemSection />
         <BeforeAfterSection />

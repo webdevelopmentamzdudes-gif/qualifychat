@@ -49,8 +49,8 @@ export function LandingNav() {
       className={cn(
         "fixed inset-x-0 top-0 z-50 w-full transition-all duration-300",
         onDarkHero
-          ? "border-b border-white/10 bg-landing-dark/50 backdrop-blur-xl"
-          : "border-b border-border/80 bg-background/95 shadow-soft backdrop-blur-xl"
+          ? "border-b border-white/10 bg-landing-dark/80 backdrop-blur-md"
+          : "border-b border-border bg-background shadow-soft backdrop-blur-xl"
       )}
     >
       <div className="container flex h-16 items-center justify-between gap-4">

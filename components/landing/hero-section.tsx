@@ -13,7 +13,7 @@ export function HeroSection() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <section className="relative overflow-hidden bg-landing-dark text-white">
+    <section className="relative overflow-hidden bg-landing-dark pt-16 text-white">
       <div className="absolute inset-0 landing-hero-grid" aria-hidden />
       <div
         className="pointer-events-none absolute -left-32 top-20 size-96 rounded-full bg-brand-1/20 blur-3xl"

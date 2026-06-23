@@ -27,6 +27,7 @@ export function Section({
       id={id}
       className={cn(
         "relative border-t border-border py-20 lg:py-24",
+        id && "scroll-mt-20",
         tint && !dark && "bg-muted/40",
         dark && "border-white/10 bg-landing-dark text-white",
         className
