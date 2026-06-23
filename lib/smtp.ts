@@ -33,7 +33,7 @@ export async function sendSmtpEmail(params: {
 }) {
   if (!smtpConfigured()) {
     console.warn(
-      "SMTP not configured (SMTP_HOST, SMTP_USER, SMTP_PASS) — skipping email."
+      "[QualifyChat email] SMTP not configured — set SMTP_HOST, SMTP_USER, SMTP_PASS on the running server and restart the app."
     );
     return { ok: false as const, error: "missing_smtp" };
   }
@@ -42,13 +42,23 @@ export async function sendSmtpEmail(params: {
     process.env.SMTP_FROM?.trim() ||
     `QualifyChat <${process.env.SMTP_USER}>`;
 
-  const transport = createTransport();
-  await transport.sendMail({
-    from,
-    to: params.to,
-    subject: params.subject,
-    html: params.html,
-  });
-
-  return { ok: true as const };
+  try {
+    const transport = createTransport();
+    const info = await transport.sendMail({
+      from,
+      to: params.to,
+      subject: params.subject,
+      html: params.html,
+    });
+    console.info(
+      `[QualifyChat email] Sent to ${params.to} — messageId=${info.messageId ?? "ok"}`
+    );
+    return { ok: true as const };
+  } catch (err) {
+    console.error(
+      `[QualifyChat email] SMTP send failed (to=${params.to}, host=${process.env.SMTP_HOST}, port=${process.env.SMTP_PORT || "465"}):`,
+      err
+    );
+    return { ok: false as const, error: "smtp_send_failed" };
+  }
 }

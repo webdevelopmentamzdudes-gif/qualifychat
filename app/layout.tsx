@@ -9,9 +9,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "QualifyChat — Turn website chats into qualified leads",
+  title: "QualifyChat — Turn website visitors into qualified leads",
   description:
-    "QualifyChat is a 24/7 AI chat widget that answers from your business info, captures leads, and hands off to you live when needed.",
+    "QualifyChat is a 24/7 AI sales agent that answers from your business context, captures leads, qualifies intent, and alerts your team — built for service businesses.",
 };
 
 export default function RootLayout({

@@ -51,12 +51,15 @@ export async function notifyOwnerNewLead(
       return;
     }
 
-    await sendNewLeadEmail({
+    const result = await sendNewLeadEmail({
       to,
       businessName: business.business_name,
       dashboardUrl: `${appUrl()}/dashboard/leads/${params.leadId}`,
       ...params,
     });
+    if (!result.ok) {
+      console.warn(`[QualifyChat email] New lead alert not sent (to=${to}).`);
+    }
   } catch (e) {
     console.error("New lead notification failed:", e);
   }
@@ -80,13 +83,16 @@ export async function notifyOwnerLiveAgentRequest(
       return;
     }
 
-    await sendLiveAgentRequestEmail({
+    const result = await sendLiveAgentRequestEmail({
       to,
       businessName: business.business_name,
       sessionId: params.sessionId,
       preview: params.preview,
       dashboardUrl: `${appUrl()}/dashboard/live-chat/${encodeURIComponent(params.sessionId)}`,
     });
+    if (!result.ok) {
+      console.warn(`[QualifyChat email] Live agent alert not sent (to=${to}).`);
+    }
   } catch (e) {
     console.error("Live agent notification failed:", e);
   }
