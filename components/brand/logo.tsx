@@ -3,9 +3,11 @@ import { cn } from "@/lib/utils";
 type LogoProps = {
   className?: string;
   showText?: boolean;
+  /** Light text for dark / transparent headers */
+  onDark?: boolean;
 };
 
-export function Logo({ className, showText = true }: LogoProps) {
+export function Logo({ className, showText = true, onDark = false }: LogoProps) {
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <div className="relative flex size-9 items-center justify-center rounded-xl bg-brand-gradient animate-gradient shadow-glow">
@@ -29,10 +31,21 @@ export function Logo({ className, showText = true }: LogoProps) {
       </div>
       {showText ? (
         <div className="flex flex-col leading-tight">
-          <span className="text-[15px] font-semibold tracking-tight">
-            Qualify<span className="text-gradient">Chat</span>
+          <span
+            className={cn(
+              "text-[15px] font-semibold tracking-tight",
+              onDark ? "text-white" : "text-foreground"
+            )}
+          >
+            Qualify
+            <span className={onDark ? "text-brand-3" : "text-gradient"}>Chat</span>
           </span>
-          <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          <span
+            className={cn(
+              "text-[10px] uppercase tracking-[0.18em]",
+              onDark ? "text-white/55" : "text-muted-foreground"
+            )}
+          >
             Chat · Qualify
           </span>
         </div>

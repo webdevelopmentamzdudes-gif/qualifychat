@@ -16,10 +16,10 @@ import { LandingFooter } from "@/components/landing/landing-footer";
 
 export default function LandingPage() {
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
+    <div className="relative min-h-screen">
       <LandingNav />
 
-      <main className="relative">
+      <main className="relative overflow-x-hidden pt-16">
         <HeroSection />
         <ProblemSection />
         <BeforeAfterSection />

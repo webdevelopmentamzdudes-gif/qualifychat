@@ -28,13 +28,18 @@ export function LandingNav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const reduceMotion = useReducedMotion();
+  const onDarkHero = !scrolled;
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
+    const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const linkClass = onDarkHero
+    ? "text-white/85 hover:text-white"
+    : "text-muted-foreground hover:text-foreground";
 
   return (
     <motion.header
@@ -42,30 +47,30 @@ export function LandingNav() {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.45, ease: "easeOut" }}
       className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-300",
-        scrolled
-          ? "border-b border-border/80 bg-background/75 shadow-soft backdrop-blur-xl"
-          : "bg-transparent",
-        !scrolled && "text-white [&_a]:text-white/80 [&_a:hover]:text-white"
+        "fixed inset-x-0 top-0 z-50 w-full transition-all duration-300",
+        onDarkHero
+          ? "border-b border-white/10 bg-landing-dark/50 backdrop-blur-xl"
+          : "border-b border-border/80 bg-background/95 shadow-soft backdrop-blur-xl"
       )}
     >
       <div className="container flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="flex shrink-0 items-center" aria-label="QualifyChat home">
-          <Logo />
+        <Link
+          href="/"
+          className="flex shrink-0 items-center"
+          aria-label="QualifyChat home"
+        >
+          <Logo onDark={onDarkHero} />
         </Link>
 
         <nav
-          className={cn(
-            "hidden items-center gap-6 text-sm font-medium lg:flex",
-            scrolled ? "text-muted-foreground" : "text-white/75"
-          )}
+          className="hidden items-center gap-6 text-sm font-medium lg:flex"
           aria-label="Main"
         >
           {navLinks.map((l) => (
             <a
               key={l.href}
               href={l.href}
-              className="transition-colors hover:text-foreground"
+              className={cn("transition-colors", linkClass)}
             >
               {l.label}
             </a>
@@ -77,7 +82,8 @@ export function LandingNav() {
             href="/login"
             className={cn(
               buttonVariants({ variant: "ghost", size: "sm" }),
-              "hidden sm:inline-flex"
+              "hidden sm:inline-flex",
+              onDarkHero && "text-white/90 hover:bg-white/10 hover:text-white"
             )}
           >
             Sign in
@@ -96,7 +102,9 @@ export function LandingNav() {
             <SheetTrigger
               className={cn(
                 buttonVariants({ variant: "outline", size: "icon-sm" }),
-                "lg:hidden"
+                "lg:hidden",
+                onDarkHero &&
+                  "border-white/25 bg-white/5 text-white hover:bg-white/10 hover:text-white"
               )}
               aria-label="Open menu"
             >
