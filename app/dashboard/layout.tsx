@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { MobileSidebar } from "@/components/dashboard/mobile-sidebar";
@@ -5,6 +6,10 @@ import { LogoutButton } from "@/components/dashboard/logout-button";
 import { Logo } from "@/components/brand/logo";
 import { seedDemoBusinessIfEmpty } from "@/lib/demo-business";
 import { LiveAgentAlert } from "@/components/dashboard/live-agent-alert";
+import { isPlatformAdminEmail } from "@/lib/admin/auth";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Shield } from "lucide-react";
 
 export default async function DashboardLayout({
   children,
@@ -25,6 +30,7 @@ export default async function DashboardLayout({
   }
 
   const emailInitial = (user?.email ?? "U").charAt(0).toUpperCase();
+  const showAdminLink = isPlatformAdminEmail(user?.email);
 
   return (
     <div className="flex min-h-screen bg-muted/30">
@@ -39,6 +45,18 @@ export default async function DashboardLayout({
           </div>
 
           <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+            {showAdminLink ? (
+              <Link
+                href="/admin"
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  "hidden gap-1.5 border-amber-500/40 text-amber-800 hover:bg-amber-500/10 sm:inline-flex"
+                )}
+              >
+                <Shield className="size-3.5" aria-hidden />
+                Admin
+              </Link>
+            ) : null}
             <div className="hidden max-w-[11rem] flex-col gap-1 text-right sm:flex lg:max-w-[16rem]">
               <span className="text-xs leading-none text-muted-foreground">
                 Signed in
