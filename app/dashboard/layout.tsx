@@ -30,20 +30,25 @@ export default async function DashboardLayout({
     <div className="flex min-h-screen bg-muted/30">
       <DashboardSidebar />
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border bg-background/85 px-4 backdrop-blur-xl sm:px-6">
-          <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-30 flex min-h-16 flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-border bg-background/95 px-4 py-2 backdrop-blur-xl sm:px-6">
+          <div className="flex min-w-0 items-center gap-3">
             <MobileSidebar />
             <div className="lg:hidden">
               <Logo />
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden text-right sm:block">
-              <p className="text-xs text-muted-foreground">Signed in</p>
-              <p className="text-sm font-medium text-foreground">
+          <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+            <div className="hidden max-w-[11rem] flex-col gap-1 text-right sm:flex lg:max-w-[16rem]">
+              <span className="text-xs leading-none text-muted-foreground">
+                Signed in
+              </span>
+              <span
+                className="truncate text-sm font-medium leading-tight text-foreground"
+                title={user?.email ?? "Account"}
+              >
                 {user?.email ?? "Account"}
-              </p>
+              </span>
             </div>
             <div className="flex size-9 items-center justify-center rounded-full bg-brand-gradient text-sm font-semibold text-white shadow-glow">
               {emailInitial}

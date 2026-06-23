@@ -89,23 +89,23 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-8 animate-fade-in">
       {/* Welcome banner */}
-      <section className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-soft sm:p-8">
+      <section className="relative isolate overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-soft sm:p-8">
         <div
           className="absolute inset-0 -z-10 bg-brand-gradient opacity-90 animate-gradient"
           aria-hidden
         />
         <div className="pointer-events-none absolute -right-10 -top-10 size-60 rounded-full bg-white/15 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-10 -left-10 size-60 rounded-full bg-white/10 blur-3xl" />
-        <div className="relative flex flex-col gap-4 text-white sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur">
-              <Sparkles className="size-3.5" />
+        <div className="relative flex flex-col gap-6 text-white sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
+            <p className="inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium leading-none backdrop-blur">
+              <Sparkles className="size-3.5 shrink-0" />
               Workspace overview
             </p>
-            <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+            <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
               Welcome back
             </h1>
-            <p className="mt-2 max-w-xl text-white/85">
+            <p className="max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
               Here&apos;s what&apos;s happening with{" "}
               <span className="font-semibold text-white">
                 {business?.business_name ?? "your business"}
@@ -117,7 +117,7 @@ export default async function DashboardPage() {
             href="/dashboard/embed"
             className={cn(
               buttonVariants(),
-              "group bg-white text-primary shadow-elevated hover:bg-white/95"
+              "group shrink-0 bg-white text-primary shadow-elevated hover:bg-white/95"
             )}
           >
             Get embed code
